@@ -220,13 +220,25 @@ export const LEVELS: Level[] = [
     teaches: ['di{', 'ci{'],
   },
   {
-    id: 'inner-tag',
+    // Tag objects (dit/dat) need a syntax tree, so the game teaches the
+    // paragraph object instead: it works on plain text.
+    id: 'a-paragraph',
     chapter: 'textobjects',
-    doc: '<p>delete the inner text</p>',
-    cursor: { line: 0, col: 5 },
-    validate: { kind: 'doc', target: '<p></p>' },
+    doc: [
+      'keep this line',
+      '',
+      'delete this paragraph',
+      'delete this line too',
+      '',
+      'keep this last line',
+    ].join('\n'),
+    cursor: { line: 2, col: 0 },
+    validate: {
+      kind: 'doc',
+      target: ['keep this line', '', 'keep this last line'].join('\n'),
+    },
     par: 3,
-    teaches: ['dit', 'cit', 'dat'],
+    teaches: ['dap', 'dip'],
   },
 
   // ----------------------------------------------------------------- visual

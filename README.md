@@ -14,7 +14,7 @@ keys you use in Neovim. [Zuki](https://github.com/jorisvilardell/zuki) reacts to
 
 1. **Motions** — `h j k l`, `w b e`, `0 ^ $`, `gg G`, `f t`, `{ }`
 2. **Operators** — `x`, `dd`, `dw`, `D`, `cw`, `yy p`, counts
-3. **Text objects** — `diw`, `daw`, `ci"`, `di(`, `di{`, `dit`
+3. **Text objects** — `diw`, `daw`, `ci"`, `di(`, `di{`, `dap`
 4. **Visual mode** — `v`, `V`, `Ctrl-v`, `>`, case switching
 5. **Search & macros** — `/ n N`, `*`, `:%s`, `.`, `q@`
 
