@@ -23,6 +23,9 @@ explains what just happened once a level is cleared — no modal ever interrupts
 buffer matches the goal, a short gauge runs before the level is validated, so you can keep
 typing and undo without being cut off.
 
+Levels are picked from a collapsible side drawer: a small calendar-style button opens a numbered
+grid, one section per chapter, showing which levels are cleared and how many stars they hold.
+
 Each level scores you against a keystroke par: three stars for solving it within par.
 Progress and language are stored in `localStorage`; the current level lives in the URL hash.
 

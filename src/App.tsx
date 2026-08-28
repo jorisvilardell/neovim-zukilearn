@@ -3,7 +3,7 @@ import Editor, { type EditorHandle, type EditorSnapshot } from './components/Edi
 import Footer from './components/Footer'
 import KeyLog from './components/KeyLog'
 import { displayKey } from './components/keyDisplay'
-import LevelNav from './components/LevelNav'
+import LevelPicker from './components/LevelPicker'
 import LevelPanel from './components/LevelPanel'
 import Navbar from './components/Navbar'
 import ZukiDialogue, { type DialoguePhase } from './components/ZukiDialogue'
@@ -165,21 +165,8 @@ export default function App() {
       <Navbar />
 
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-4 p-3 sm:p-6 lg:flex-row lg:gap-6">
-        <aside className="order-3 w-full shrink-0 rounded-2xl border border-slate-800 bg-slate-900/40 p-4 lg:order-1 lg:w-60">
-          <LevelNav
-            currentId={level.id}
-            progress={progress}
-            onSelect={selectLevel}
-            onReset={() => {
-              if (window.confirm(t('nav.resetConfirm'))) {
-                setProgress(resetProgress())
-                restart()
-              }
-            }}
-          />
-        </aside>
 
-        <div className="order-1 flex min-w-0 flex-1 flex-col gap-4 lg:order-2">
+        <div className="flex min-w-0 flex-1 flex-col gap-4">
           <ZukiDialogue
             phase={phase}
             mode={mode}
@@ -189,7 +176,22 @@ export default function App() {
           />
 
           <section className="flex flex-col gap-2">
-            <KeyLog mode={mode} keystrokes={keystrokes} par={level.par} recent={recent} />
+            <div className="flex flex-wrap items-center gap-3">
+              <LevelPicker
+                currentId={level.id}
+                progress={progress}
+                onSelect={selectLevel}
+                onResetProgress={() => {
+                  if (window.confirm(t('nav.resetConfirm'))) {
+                    setProgress(resetProgress())
+                    restart()
+                  }
+                }}
+              />
+              <div className="min-w-0 flex-1">
+                <KeyLog mode={mode} keystrokes={keystrokes} par={level.par} recent={recent} />
+              </div>
+            </div>
             <div className="h-[45vh] min-h-[16rem] lg:h-[55vh]">
               <Editor
                 ref={editorRef}
@@ -203,7 +205,7 @@ export default function App() {
           </section>
         </div>
 
-        <aside className="order-2 w-full shrink-0 rounded-2xl border border-slate-800 bg-slate-900/40 p-4 lg:order-3 lg:w-72">
+        <aside className="w-full shrink-0 rounded-2xl border border-slate-800 bg-slate-900/40 p-4 lg:w-72">
           <LevelPanel
             level={level}
             index={index}

@@ -18,7 +18,12 @@ body {
   font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
 }
 
-/* The vim status panel rendered by @replit/codemirror-vim. */
+/* The vim status panel rendered by @replit/codemirror-vim. It ships a high
+   z-index, which would otherwise float above the level drawer. */
+.cm-editor .cm-panels {
+  z-index: 0;
+}
+
 .cm-vim-panel input {
   color: inherit;
   font-family: var(--font-mono);
