@@ -1,5 +1,5 @@
-import { useCallback, useMemo, useState } from 'react'
-import Editor, { type EditorSnapshot } from './components/Editor'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import Editor, { type EditorHandle, type EditorSnapshot } from './components/Editor'
 import Footer from './components/Footer'
 import KeyLog from './components/KeyLog'
 import { displayKey } from './components/keyDisplay'
@@ -25,6 +25,10 @@ export default function App() {
 
   const [resetNonce, setResetNonce] = useState(0)
   const [keystrokes, setKeystrokes] = useState(0)
+  // Counted in a ref too: the solving keystroke must already be included when
+  // the editor reports the winning snapshot in the same event.
+  const keystrokesRef = useRef(0)
+  const editorRef = useRef<EditorHandle | null>(null)
   const [recent, setRecent] = useState<string[]>([])
   const [mode, setMode] = useState<EditorSnapshot['mode']>('normal')
   const [result, setResult] = useState<LevelResult | null>(null)
@@ -35,10 +39,12 @@ export default function App() {
 
   const restart = useCallback(() => {
     setResetNonce((nonce) => nonce + 1)
+    keystrokesRef.current = 0
     setKeystrokes(0)
     setRecent([])
     setResult(null)
     setModalOpen(false)
+    editorRef.current?.focus()
   }, [])
 
   const selectLevel = useCallback(
@@ -50,7 +56,8 @@ export default function App() {
   )
 
   const onKeystroke = useCallback((key: string) => {
-    setKeystrokes((count) => count + 1)
+    keystrokesRef.current += 1
+    setKeystrokes(keystrokesRef.current)
     setRecent((keys) => [...keys, displayKey(key)].slice(-RECENT_KEYS))
   }, [])
 
@@ -59,15 +66,14 @@ export default function App() {
       setMode(snapshot.mode)
       if (result) return
       if (!isSolved(level.validate, snapshot.doc, snapshot.cursor)) return
-      // The keystroke that solved the level is counted by the same event batch.
-      setKeystrokes((count) => {
-        const solvedWith = Math.max(count, 1)
-        const levelResult: LevelResult = { keystrokes: solvedWith, stars: starsFor(level, solvedWith) }
-        setResult(levelResult)
-        setModalOpen(true)
-        setProgress((current) => saveResult(current, level.id, levelResult))
-        return count
-      })
+      const solvedWith = Math.max(keystrokesRef.current, 1)
+      const levelResult: LevelResult = {
+        keystrokes: solvedWith,
+        stars: starsFor(level, solvedWith),
+      }
+      setResult(levelResult)
+      setModalOpen(true)
+      setProgress((current) => saveResult(current, level.id, levelResult))
     },
     [level, result],
   )
@@ -103,6 +109,7 @@ export default function App() {
           <KeyLog mode={mode} keystrokes={keystrokes} par={level.par} recent={recent} />
           <div className="min-h-[20rem] flex-1">
             <Editor
+              ref={editorRef}
               level={level}
               resetNonce={resetNonce}
               onSnapshot={onSnapshot}
@@ -135,7 +142,10 @@ export default function App() {
           hasNext={hasNext}
           onNext={() => selectLevel(LEVELS[index + 1].id)}
           onRetry={restart}
-          onClose={() => setModalOpen(false)}
+          onClose={() => {
+            setModalOpen(false)
+            editorRef.current?.focus()
+          }}
         />
       )}
     </div>

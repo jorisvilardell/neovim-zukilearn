@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useImperativeHandle, useRef, type RefObject } from 'react'
 import { EditorState, type Extension } from '@codemirror/state'
-import { EditorView, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view'
+import { EditorView, drawSelection, keymap, lineNumbers, highlightActiveLine } from '@codemirror/view'
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { indentUnit } from '@codemirror/language'
 import { search } from '@codemirror/search'
@@ -15,7 +15,12 @@ export type EditorSnapshot = {
   mode: VimMode
 }
 
+export type EditorHandle = {
+  focus: () => void
+}
+
 type Props = {
+  ref?: RefObject<EditorHandle | null>
   level: Level
   /** Bumped by the parent to reload the level from scratch. */
   resetNonce: number
@@ -71,9 +76,11 @@ function snapshotOf(view: EditorView): EditorSnapshot {
   }
 }
 
-export default function Editor({ level, resetNonce, onSnapshot, onKeystroke }: Props) {
+export default function Editor({ ref, level, resetNonce, onSnapshot, onKeystroke }: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
+
+  useImperativeHandle(ref, () => ({ focus: () => viewRef.current?.focus() }), [])
   // Callbacks live in refs so that changing them never rebuilds the editor.
   const snapshotRef = useRef(onSnapshot)
   const keystrokeRef = useRef(onKeystroke)
@@ -89,6 +96,9 @@ export default function Editor({ level, resetNonce, onSnapshot, onKeystroke }: P
       vim({ status: true }),
       lineNumbers(),
       highlightActiveLine(),
+      drawSelection(),
+      // Blockwise visual mode (Ctrl-v) needs several ranges at once.
+      EditorState.allowMultipleSelections.of(true),
       history(),
       search(),
       indentUnit.of('  '),
@@ -100,13 +110,14 @@ export default function Editor({ level, resetNonce, onSnapshot, onKeystroke }: P
           snapshotRef.current(snapshotOf(update.view))
         }
       }),
-      EditorView.domEventHandlers({
-        keydown: (event) => {
-          if (!MODIFIER_KEYS.has(event.key)) keystrokeRef.current(event.key)
-          return false
-        },
-      }),
     ]
+
+    // Capture phase: vim's own keymap stops propagation, so a regular
+    // handler would never see the key.
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (!MODIFIER_KEYS.has(event.key)) keystrokeRef.current(event.key)
+    }
+    host.addEventListener('keydown', onKeyDown, true)
 
     const view = new EditorView({
       state: EditorState.create({ doc: level.doc, extensions }),
@@ -116,10 +127,15 @@ export default function Editor({ level, resetNonce, onSnapshot, onKeystroke }: P
 
     const offset = view.state.doc.line(level.cursor.line + 1).from + level.cursor.col
     view.dispatch({ selection: { anchor: offset, head: offset } })
+    // A UI button may still hold focus when this runs, so claim it on the
+    // next frame as well.
     view.focus()
+    const focusFrame = requestAnimationFrame(() => view.focus())
     snapshotRef.current(snapshotOf(view))
 
     return () => {
+      cancelAnimationFrame(focusFrame)
+      host.removeEventListener('keydown', onKeyDown, true)
       view.destroy()
       viewRef.current = null
     }
