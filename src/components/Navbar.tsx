@@ -1,4 +1,4 @@
-import { ZukiFavicon } from '@zukquote/zuki-react'
+import { Zuki } from '@zukquote/zuki-react'
 import { useI18n } from '../i18n/useI18n'
 
 export default function Navbar() {
@@ -7,7 +7,8 @@ export default function Navbar() {
   return (
     <header className="flex items-center justify-between gap-4 border-b border-slate-800 px-4 py-3 sm:px-6">
       <div className="flex items-center gap-3">
-        <ZukiFavicon theme="orange" size={36} />
+        {/* ZukiFavicon forces a helmet, so the head is built from Zuki itself. */}
+        <Zuki pose="idle" theme="orange" accessory="beanie" hideLimbs size={40} />
         <div>
           <h1 className="text-lg font-semibold text-slate-100">{t('app.title')}</h1>
           <p className="hidden text-xs text-slate-400 sm:block">{t('app.tagline')}</p>

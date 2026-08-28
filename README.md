@@ -18,8 +18,15 @@ keys you use in Neovim. [Zuki](https://github.com/jorisvilardell/zuki) reacts to
 4. **Visual mode** — `v`, `V`, `Ctrl-v`, `>`, case switching
 5. **Search & macros** — `/ n N`, `*`, `:%s`, `.`, `q@`
 
+Zuki narrates: he introduces each chapter, states the task, hands out hints on request and
+explains what just happened once a level is cleared — no modal ever interrupts you. When the
+buffer matches the goal, a short gauge runs before the level is validated, so you can keep
+typing and undo without being cut off.
+
 Each level scores you against a keystroke par: three stars for solving it within par.
 Progress and language are stored in `localStorage`; the current level lives in the URL hash.
+
+The tab icon is generated from the mascot itself with `node scripts/gen-favicon.mjs`.
 
 ## Development
 

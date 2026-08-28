@@ -9,6 +9,7 @@ declare module '@zukquote/zuki-react' {
     accessory?: string
     accessoryColor?: string
     size?: number
+    hideLimbs?: boolean
   }
 
   export const Zuki: FC<ZukiProps>
