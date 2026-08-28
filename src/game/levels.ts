@@ -1,0 +1,346 @@
+import type { ChapterId, Level } from './types'
+
+export const CHAPTERS: ChapterId[] = ['motions', 'operators', 'textobjects', 'visual', 'search']
+
+/**
+ * Docs never end with a newline so that `doc` validation stays an exact
+ * string comparison.
+ */
+export const LEVELS: Level[] = [
+  // ---------------------------------------------------------------- motions
+  {
+    id: 'hjkl',
+    chapter: 'motions',
+    doc: ['. . . . . . .', '. . . . . . .', '. . . X . . .', '. . . . . . .'].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 2, col: 6 },
+    par: 8,
+    teaches: ['h', 'j', 'k', 'l'],
+  },
+  {
+    id: 'word',
+    chapter: 'motions',
+    doc: 'Zuki the crab moves fast across the buffer',
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 0, col: 25 },
+    par: 5,
+    teaches: ['w', 'b'],
+  },
+  {
+    id: 'end-of-word',
+    chapter: 'motions',
+    doc: 'neovim rewards precise motions',
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 0, col: 21 },
+    par: 3,
+    teaches: ['e', 'ge'],
+  },
+  {
+    id: 'line-ends',
+    chapter: 'motions',
+    doc: ['jump to the very end of this line', 'and back to the very beginning'].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 0, col: 32 },
+    par: 1,
+    teaches: ['0', '^', '$'],
+  },
+  {
+    id: 'file-ends',
+    chapter: 'motions',
+    doc: ['line one', 'line two', 'line three', 'line four', 'line five', 'the end'].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 5, col: 0 },
+    par: 1,
+    teaches: ['gg', 'G'],
+  },
+  {
+    id: 'goto-line',
+    chapter: 'motions',
+    doc: [
+      'alpha',
+      'bravo',
+      'charlie',
+      'delta',
+      'echo',
+      'foxtrot',
+      'golf',
+      'hotel',
+      'india',
+      'juliett',
+    ].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 6, col: 0 },
+    par: 2,
+    teaches: ['7G', ':7'],
+  },
+  {
+    id: 'find-char',
+    chapter: 'motions',
+    doc: 'find the ; then stop right there',
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 0, col: 9 },
+    par: 2,
+    teaches: ['f', 't', 'F', 'T', ';'],
+  },
+  {
+    id: 'paragraphs',
+    chapter: 'motions',
+    doc: [
+      'first paragraph line one',
+      'first paragraph line two',
+      '',
+      'second paragraph line one',
+      '',
+      'third paragraph line one',
+    ].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 4, col: 0 },
+    par: 2,
+    teaches: ['{', '}'],
+  },
+
+  // -------------------------------------------------------------- operators
+  {
+    id: 'delete-char',
+    chapter: 'operators',
+    doc: 'Zukii the crab',
+    cursor: { line: 0, col: 4 },
+    validate: { kind: 'doc', target: 'Zuki the crab' },
+    par: 1,
+    teaches: ['x'],
+  },
+  {
+    id: 'delete-line',
+    chapter: 'operators',
+    doc: ['keep this line', 'delete this line', 'keep this line too'].join('\n'),
+    cursor: { line: 1, col: 0 },
+    validate: { kind: 'doc', target: ['keep this line', 'keep this line too'].join('\n') },
+    par: 2,
+    teaches: ['dd'],
+  },
+  {
+    id: 'delete-word',
+    chapter: 'operators',
+    doc: 'vim deletes junk words fast',
+    cursor: { line: 0, col: 12 },
+    validate: { kind: 'doc', target: 'vim deletes words fast' },
+    par: 2,
+    teaches: ['dw', 'de'],
+  },
+  {
+    id: 'delete-to-end',
+    chapter: 'operators',
+    doc: 'keep this. delete the rest of this line',
+    cursor: { line: 0, col: 10 },
+    validate: { kind: 'doc', target: 'keep this.' },
+    par: 1,
+    teaches: ['D', 'd$'],
+  },
+  {
+    id: 'change-word',
+    chapter: 'operators',
+    doc: 'zuki is a bug',
+    cursor: { line: 0, col: 10 },
+    validate: { kind: 'doc', target: 'zuki is a crab' },
+    par: 7,
+    teaches: ['cw', 'Esc'],
+  },
+  {
+    id: 'yank-put',
+    chapter: 'operators',
+    doc: 'copy me',
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'doc', target: ['copy me', 'copy me'].join('\n') },
+    par: 3,
+    teaches: ['yy', 'p', 'P'],
+  },
+  {
+    id: 'counts',
+    chapter: 'operators',
+    doc: ['keep', 'drop 1', 'drop 2', 'drop 3', 'keep too'].join('\n'),
+    cursor: { line: 1, col: 0 },
+    validate: { kind: 'doc', target: ['keep', 'keep too'].join('\n') },
+    par: 3,
+    teaches: ['3dd', '2w'],
+  },
+  {
+    id: 'move-line',
+    chapter: 'operators',
+    doc: ['second', 'first'].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'doc', target: ['first', 'second'].join('\n') },
+    par: 3,
+    teaches: ['dd', 'p', 'u'],
+  },
+
+  // ------------------------------------------------------------ textobjects
+  {
+    id: 'inner-word',
+    chapter: 'textobjects',
+    doc: 'total = old + new',
+    cursor: { line: 0, col: 9 },
+    validate: { kind: 'doc', target: 'total =  + new' },
+    par: 3,
+    teaches: ['diw'],
+  },
+  {
+    id: 'a-word',
+    chapter: 'textobjects',
+    doc: 'remove the noise word here',
+    cursor: { line: 0, col: 13 },
+    validate: { kind: 'doc', target: 'remove the word here' },
+    par: 3,
+    teaches: ['daw'],
+  },
+  {
+    id: 'inner-quotes',
+    chapter: 'textobjects',
+    doc: 'const greeting = "hello"',
+    cursor: { line: 0, col: 20 },
+    validate: { kind: 'doc', target: 'const greeting = "zuki"' },
+    par: 8,
+    teaches: ['ci"', 'ca"'],
+  },
+  {
+    id: 'inner-parens',
+    chapter: 'textobjects',
+    doc: 'call(remove, these, args)',
+    cursor: { line: 0, col: 8 },
+    validate: { kind: 'doc', target: 'call()' },
+    par: 3,
+    teaches: ['di(', 'ci('],
+  },
+  {
+    id: 'inner-braces',
+    chapter: 'textobjects',
+    doc: 'const zuki = { theme: "orange" }',
+    cursor: { line: 0, col: 20 },
+    validate: { kind: 'doc', target: 'const zuki = {}' },
+    par: 3,
+    teaches: ['di{', 'ci{'],
+  },
+  {
+    id: 'inner-tag',
+    chapter: 'textobjects',
+    doc: '<p>delete the inner text</p>',
+    cursor: { line: 0, col: 5 },
+    validate: { kind: 'doc', target: '<p></p>' },
+    par: 3,
+    teaches: ['dit', 'cit', 'dat'],
+  },
+
+  // ----------------------------------------------------------------- visual
+  {
+    id: 'visual-char',
+    chapter: 'visual',
+    doc: 'visual mode selects text',
+    cursor: { line: 0, col: 7 },
+    validate: { kind: 'doc', target: 'visual  selects text' },
+    par: 3,
+    teaches: ['v', 'e', 'd'],
+  },
+  {
+    id: 'visual-line',
+    chapter: 'visual',
+    doc: ['keep the first line', 'drop the middle line', 'keep the last line'].join('\n'),
+    cursor: { line: 1, col: 0 },
+    validate: { kind: 'doc', target: ['keep the first line', 'keep the last line'].join('\n') },
+    par: 2,
+    teaches: ['V', 'd'],
+  },
+  {
+    id: 'visual-block',
+    chapter: 'visual',
+    doc: ['- alpha', '- bravo', '- charlie'].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'doc', target: ['alpha', 'bravo', 'charlie'].join('\n') },
+    par: 5,
+    teaches: ['Ctrl-v', 'x'],
+  },
+  {
+    id: 'visual-indent',
+    chapter: 'visual',
+    doc: ['if (zuki) {', 'call()', '}'].join('\n'),
+    cursor: { line: 1, col: 0 },
+    validate: { kind: 'doc', target: ['if (zuki) {', '  call()', '}'].join('\n') },
+    par: 2,
+    teaches: ['V', '>', '<'],
+  },
+  {
+    id: 'visual-case',
+    chapter: 'visual',
+    doc: 'SHOUTING LINE HERE',
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'doc', target: 'shouting line here' },
+    par: 2,
+    teaches: ['V', 'u', 'U', '~'],
+  },
+
+  // ----------------------------------------------------------------- search
+  {
+    id: 'search-next',
+    chapter: 'search',
+    doc: ['find the hidden crab', 'somewhere in this buffer', 'the crab is here'].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 2, col: 4 },
+    par: 7,
+    teaches: ['/', 'n', 'N'],
+  },
+  {
+    id: 'search-word',
+    chapter: 'search',
+    doc: ['zuki waves', 'other line', 'zuki waves again'].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: { kind: 'cursor', line: 2, col: 0 },
+    par: 1,
+    teaches: ['*', '#'],
+  },
+  {
+    id: 'substitute',
+    chapter: 'search',
+    doc: ['bug in line one', 'bug in line two', 'bug in line three'].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: {
+      kind: 'doc',
+      target: ['crab in line one', 'crab in line two', 'crab in line three'].join('\n'),
+    },
+    par: 16,
+    teaches: [':%s/old/new/g'],
+  },
+  {
+    id: 'dot-repeat',
+    chapter: 'search',
+    doc: ['drop junk here', 'drop junk there', 'drop junk everywhere'].join('\n'),
+    cursor: { line: 0, col: 5 },
+    validate: {
+      kind: 'doc',
+      target: ['drop here', 'drop there', 'drop everywhere'].join('\n'),
+    },
+    par: 6,
+    teaches: ['.', 'dw'],
+  },
+  {
+    id: 'macro',
+    chapter: 'search',
+    doc: ['1 alpha', '2 bravo', '3 charlie', '4 delta'].join('\n'),
+    cursor: { line: 0, col: 0 },
+    validate: {
+      kind: 'doc',
+      target: ['alpha', 'bravo', 'charlie', 'delta'].join('\n'),
+    },
+    par: 12,
+    teaches: ['qa', 'q', '@a'],
+  },
+]
+
+export function levelIndex(id: string): number {
+  return LEVELS.findIndex((level) => level.id === id)
+}
+
+export function levelById(id: string): Level | undefined {
+  return LEVELS.find((level) => level.id === id)
+}
+
+export function levelsOfChapter(chapter: ChapterId): Level[] {
+  return LEVELS.filter((level) => level.chapter === chapter)
+}
