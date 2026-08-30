@@ -1,6 +1,11 @@
-import type { Cursor, Level, Validation } from './types'
+import type { Cursor, Level, Validation, VimMode } from './types'
 
-export function isSolved(validation: Validation, doc: string, cursor: Cursor): boolean {
+export function isSolved(
+  validation: Validation,
+  doc: string,
+  cursor: Cursor,
+  mode: VimMode,
+): boolean {
   switch (validation.kind) {
     case 'doc':
       return doc === validation.target
@@ -14,6 +19,11 @@ export function isSolved(validation: Validation, doc: string, cursor: Cursor): b
       )
     case 'predicate':
       return validation.fn(doc, cursor)
+    case 'mode':
+      return mode === validation.mode
+    case 'command':
+      // Ex commands are reported by the editor, not read from the buffer.
+      return false
   }
 }
 
@@ -23,8 +33,7 @@ export function starsFor(level: Level, keystrokes: number): 1 | 2 | 3 {
   return 1
 }
 
-/** The expected buffer once solved, when the level defines one. */
-export function targetDoc(level: Level): string | null {
-  const v = level.validate
-  return v.kind === 'doc' || v.kind === 'both' ? v.target : null
+/** The expected buffer for one validation, when it defines one. */
+export function targetDoc(validation: Validation): string | null {
+  return validation.kind === 'doc' || validation.kind === 'both' ? validation.target : null
 }

@@ -4,7 +4,7 @@ import { EditorView, drawSelection, keymap, lineNumbers, highlightActiveLine } f
 import { defaultKeymap, history, historyKeymap } from '@codemirror/commands'
 import { indentUnit } from '@codemirror/language'
 import { search } from '@codemirror/search'
-import { vim, getCM } from '@replit/codemirror-vim'
+import { vim, getCM, Vim } from '@replit/codemirror-vim'
 import type { Cursor, Level } from '../game/types'
 
 export type VimMode = 'normal' | 'insert' | 'visual' | 'replace'
@@ -26,6 +26,8 @@ type Props = {
   resetNonce: number
   onSnapshot: (snapshot: EditorSnapshot) => void
   onKeystroke: (key: string) => void
+  /** Called with the name of an ex command such as 'w' or 'q'. */
+  onCommand: (command: string) => void
 }
 
 const editorTheme = EditorView.theme(
@@ -76,7 +78,22 @@ function snapshotOf(view: EditorView): EditorSnapshot {
   }
 }
 
-export default function Editor({ ref, level, resetNonce, onSnapshot, onKeystroke }: Props) {
+/** :w and friends have no file to act on here, so the game listens to them. */
+const EX_COMMANDS: Array<[name: string, short: string]> = [
+  ['write', 'w'],
+  ['quit', 'q'],
+  ['wq', 'wq'],
+  ['xit', 'x'],
+]
+
+export default function Editor({
+  ref,
+  level,
+  resetNonce,
+  onSnapshot,
+  onKeystroke,
+  onCommand,
+}: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null)
   const viewRef = useRef<EditorView | null>(null)
 
@@ -84,8 +101,16 @@ export default function Editor({ ref, level, resetNonce, onSnapshot, onKeystroke
   // Callbacks live in refs so that changing them never rebuilds the editor.
   const snapshotRef = useRef(onSnapshot)
   const keystrokeRef = useRef(onKeystroke)
+  const commandRef = useRef(onCommand)
   snapshotRef.current = onSnapshot
   keystrokeRef.current = onKeystroke
+  commandRef.current = onCommand
+
+  useEffect(() => {
+    for (const [name, short] of EX_COMMANDS) {
+      Vim.defineEx(name, short, () => commandRef.current(short))
+    }
+  }, [])
 
   useEffect(() => {
     const host = hostRef.current
@@ -127,6 +152,11 @@ export default function Editor({ ref, level, resetNonce, onSnapshot, onKeystroke
 
     const offset = view.state.doc.line(level.cursor.line + 1).from + level.cursor.col
     view.dispatch({ selection: { anchor: offset, head: offset } })
+    if (import.meta.env.DEV) {
+      // Dev-only handle used to drive vim from the console when testing levels.
+      ;(window as unknown as Record<string, unknown>).__zk = { view, cm: getCM(view), Vim }
+    }
+
     // A UI button may still hold focus when this runs, so claim it on the
     // next frame as well.
     view.focus()

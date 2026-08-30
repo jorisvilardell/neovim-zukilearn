@@ -1,12 +1,14 @@
 import type { DictKey } from '../i18n/dict'
 import { useI18n } from '../i18n/useI18n'
 import { targetDoc } from '../game/validate'
-import type { Level, LevelResult } from '../game/types'
+import type { Level, LevelResult, LevelStep } from '../game/types'
 
 type Props = {
   level: Level
   index: number
   total: number
+  step: LevelStep
+  stepIndex: number
   cleared: boolean
   result: LevelResult | null
   hintShown: boolean
@@ -20,6 +22,8 @@ export default function LevelPanel({
   level,
   index,
   total,
+  step,
+  stepIndex,
   cleared,
   result,
   hintShown,
@@ -29,9 +33,9 @@ export default function LevelPanel({
   onNext,
 }: Props) {
   const { t } = useI18n()
-  const target = targetDoc(level)
+  const target = targetDoc(step.validate)
   const cursorTarget =
-    level.validate.kind === 'cursor' || level.validate.kind === 'both' ? level.validate : null
+    step.validate.kind === 'cursor' || step.validate.kind === 'both' ? step.validate : null
 
   return (
     <section className="flex flex-col gap-4">
@@ -39,6 +43,11 @@ export default function LevelPanel({
         <div className="min-w-0">
           <p className="text-xs tracking-widest text-orange-400 uppercase">
             {t('panel.level', { index: index + 1, total })}
+            {level.steps.length > 1 && (
+              <span className="ml-2 text-slate-500 normal-case">
+                {t('panel.step', { index: stepIndex + 1, total: level.steps.length })}
+              </span>
+            )}
           </p>
           <h2 className="truncate text-lg font-semibold text-slate-100">
             {t(`level.${level.id}.title` as DictKey)}

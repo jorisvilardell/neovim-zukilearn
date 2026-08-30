@@ -16,8 +16,9 @@ import type { DictKey } from './i18n/dict'
 import { useI18n } from './i18n/useI18n'
 
 const RECENT_KEYS = 12
-/** How long Zuki takes to confirm a solution, in milliseconds. */
+/** How long Zuki takes to confirm a step, in milliseconds. */
 const CHECK_DURATION = 1200
+const STEP_CHECK_DURATION = 600
 const CHECK_TICK = 60
 
 export default function App() {
@@ -35,6 +36,9 @@ export default function App() {
   const [recent, setRecent] = useState<string[]>([])
   const [mode, setMode] = useState<EditorSnapshot['mode']>('normal')
   const [result, setResult] = useState<LevelResult | null>(null)
+  const [stepIndex, setStepIndex] = useState(0)
+  // True right after a step was validated, so Zuki can acknowledge it.
+  const [stepJustDone, setStepJustDone] = useState(false)
   const [hintShown, setHintShown] = useState(false)
   // Non-null while Zuki is checking a solution that still has to hold still.
   const [checkProgress, setCheckProgress] = useState<number | null>(null)
@@ -42,6 +46,8 @@ export default function App() {
 
   const index = levelIndex(level.id)
   const hasNext = index >= 0 && index < LEVELS.length - 1
+  const step = level.steps[Math.min(stepIndex, level.steps.length - 1)]
+  const isLastStep = stepIndex >= level.steps.length - 1
 
   const stopChecking = useCallback(() => {
     if (checkTimer.current !== null) {
@@ -60,6 +66,8 @@ export default function App() {
     setKeystrokes(0)
     setRecent([])
     setResult(null)
+    setStepIndex(0)
+    setStepJustDone(false)
     setHintShown(false)
     editorRef.current?.focus()
   }, [stopChecking])
@@ -73,6 +81,7 @@ export default function App() {
   )
 
   const onKeystroke = useCallback((key: string) => {
+    setStepJustDone(false)
     keystrokesRef.current += 1
     setKeystrokes(keystrokesRef.current)
     setRecent((keys) => [...keys, displayKey(key)].slice(-RECENT_KEYS))
@@ -88,32 +97,49 @@ export default function App() {
     setProgress((current) => saveResult(current, level.id, levelResult))
   }, [level])
 
+  // Let the answer sit for a moment instead of interrupting straight away.
+  const beginCheck = useCallback(() => {
+    if (checkTimer.current !== null) return
+    const duration = isLastStep ? CHECK_DURATION : STEP_CHECK_DURATION
+    const startedAt = performance.now()
+    setCheckProgress(0)
+    checkTimer.current = window.setInterval(() => {
+      const ratio = Math.min(1, (performance.now() - startedAt) / duration)
+      setCheckProgress(ratio)
+      if (ratio < 1) return
+      stopChecking()
+      if (isLastStep) {
+        commitResult()
+      } else {
+        setStepIndex((current) => current + 1)
+        setStepJustDone(true)
+      }
+    }, CHECK_TICK)
+  }, [isLastStep, commitResult, stopChecking])
+
   const onSnapshot = useCallback(
     (snapshot: EditorSnapshot) => {
       setMode(snapshot.mode)
       if (result) return
 
-      const solved = isSolved(level.validate, snapshot.doc, snapshot.cursor)
-      if (!solved) {
+      if (!isSolved(step.validate, snapshot.doc, snapshot.cursor, snapshot.mode)) {
         // The buffer moved away from the answer while Zuki was checking.
-        if (checkTimer.current !== null) stopChecking()
+        if (checkTimer.current !== null && step.validate.kind !== 'command') stopChecking()
         return
       }
-      if (checkTimer.current !== null) return
-
-      // Let the solution sit for a moment instead of interrupting straight away.
-      const startedAt = performance.now()
-      setCheckProgress(0)
-      checkTimer.current = window.setInterval(() => {
-        const ratio = Math.min(1, (performance.now() - startedAt) / CHECK_DURATION)
-        setCheckProgress(ratio)
-        if (ratio >= 1) {
-          stopChecking()
-          commitResult()
-        }
-      }, CHECK_TICK)
+      beginCheck()
     },
-    [level, result, commitResult, stopChecking],
+    [step, result, beginCheck, stopChecking],
+  )
+
+  const onCommand = useCallback(
+    (command: string) => {
+      if (result) return
+      if (step.validate.kind !== 'command') return
+      if (step.validate.command !== command) return
+      beginCheck()
+    },
+    [step, result, beginCheck],
   )
 
   const everySolved = useMemo(
@@ -145,8 +171,10 @@ export default function App() {
         return t('zuki.typing')
       case 'stuck':
         return t('zuki.stuck')
-      default:
-        return t(`level.${level.id}.task` as DictKey)
+      default: {
+        const task = t(`level.${level.id}.task.${stepIndex + 1}` as DictKey)
+        return stepJustDone ? `${t('zuki.stepDone')} ${task}` : task
+      }
     }
   })()
 
@@ -156,8 +184,11 @@ export default function App() {
   const aside = (() => {
     if (hintShown) return t(`level.${level.id}.hint` as DictKey)
     if (phase === 'solved' || phase === 'finished') return null
-    if (phase === 'idle') return opensChapter ? t(`chapter.${level.chapter}.intro` as DictKey) : null
-    return t(`level.${level.id}.task` as DictKey)
+    if (phase === 'idle')
+      return opensChapter && stepIndex === 0
+        ? t(`chapter.${level.chapter}.intro` as DictKey)
+        : null
+    return t(`level.${level.id}.task.${stepIndex + 1}` as DictKey)
   })()
 
   return (
@@ -199,6 +230,7 @@ export default function App() {
                 resetNonce={resetNonce}
                 onSnapshot={onSnapshot}
                 onKeystroke={onKeystroke}
+                onCommand={onCommand}
               />
             </div>
             <p className="text-xs text-slate-500">{t('editor.hintFocus')}</p>
@@ -210,6 +242,8 @@ export default function App() {
             level={level}
             index={index}
             total={LEVELS.length}
+            step={step}
+            stepIndex={stepIndex}
             cleared={Boolean(progress[level.id])}
             result={result}
             hintShown={hintShown}

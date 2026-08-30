@@ -5,18 +5,20 @@
 
 ---
 
-Zukilearn is a pure frontend game: 32 short levels take you from `hjkl` to macros, each one
-played inside a real editor. Vim behavior comes from [CodeMirror 6](https://codemirror.net/) with
+Zukilearn is a pure frontend game: 36 short levels take you from « what is insert mode » to
+macros, each one played inside a real editor. Every level runs in two or three steps, so the
+keys it teaches are all used at least once — jump to the bottom with `G`, then back up with `gg`. Vim behavior comes from [CodeMirror 6](https://codemirror.net/) with
 [@replit/codemirror-vim](https://github.com/replit/codemirror-vim), so the keys you learn are the
 keys you use in Neovim. [Zuki](https://github.com/jorisvilardell/zuki) reacts to how you are doing.
 
 ## Chapters
 
-1. **Motions** — `h j k l`, `w b e`, `0 ^ $`, `gg G`, `f t`, `{ }`
-2. **Operators** — `x`, `dd`, `dw`, `D`, `cw`, `yy p`, counts
-3. **Text objects** — `diw`, `daw`, `ci"`, `di(`, `di{`, `dap`
-4. **Visual mode** — `v`, `V`, `Ctrl-v`, `>`, case switching
-5. **Search & macros** — `/ n N`, `*`, `:%s`, `.`, `q@`
+1. **Basics** — modes (`i`, `Esc`, `v`), typing (`i a A`), new lines (`o O`), `:w` and `:q`
+2. **Motions** — `h j k l`, `w b e`, `0 ^ $`, `gg G`, `f t`, `{ }`
+3. **Operators** — `x`, `dd`, `dw`, `D`, `cw`, `yy p P`, counts, `u` / `Ctrl-r`
+4. **Text objects** — `diw`, `daw`, `ci"`, `di(`, `di{`, `dap`
+5. **Visual mode** — `v`, `V`, `Ctrl-v` (with `I`), `> <`, case switching
+6. **Search & macros** — `/ n N`, `*`, `:%s`, `.`, `q@`
 
 Zuki narrates: he introduces each chapter, states the task, hands out hints on request and
 explains what just happened once a level is cleared — no modal ever interrupts you. When the
