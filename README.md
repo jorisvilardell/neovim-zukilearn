@@ -28,6 +28,9 @@ typing and undo without being cut off.
 Levels are picked from a collapsible side drawer: a small calendar-style button opens a numbered
 grid, one section per chapter, showing which levels are cleared and how many stars they hold.
 
+The basics chapter is free play: keystrokes are not scored there and the checks are tolerant, so
+a beginner can type anything, move with the arrow keys and watch which mode allows what.
+
 Each level scores you against a keystroke par: three stars for solving it within par.
 Progress and language are stored in `localStorage`; the current level lives in the URL hash.
 

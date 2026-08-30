@@ -5,6 +5,7 @@ type Props = {
   mode: VimMode
   keystrokes: number
   par: number
+  freePlay: boolean
   recent: string[]
 }
 
@@ -15,7 +16,7 @@ const MODE_STYLES: Record<VimMode, string> = {
   replace: 'bg-rose-500/20 text-rose-300 border-rose-500/40',
 }
 
-export default function KeyLog({ mode, keystrokes, par, recent }: Props) {
+export default function KeyLog({ mode, keystrokes, par, freePlay, recent }: Props) {
   const { t } = useI18n()
 
   return (
@@ -27,10 +28,12 @@ export default function KeyLog({ mode, keystrokes, par, recent }: Props) {
       </span>
       <span className="text-slate-400">
         {t('editor.keystrokes')}:{' '}
-        <span className={keystrokes > par ? 'text-amber-400' : 'text-emerald-400'}>
+        <span className={!freePlay && keystrokes > par ? 'text-amber-400' : 'text-emerald-400'}>
           {keystrokes}
         </span>{' '}
-        <span className="text-slate-500">({t('editor.par', { par })})</span>
+        <span className="text-slate-500">
+          ({freePlay ? t('editor.freePlay') : t('editor.par', { par })})
+        </span>
       </span>
       <span className="ml-auto flex gap-1">
         {recent.map((key, index) => (

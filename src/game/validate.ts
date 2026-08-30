@@ -28,6 +28,7 @@ export function isSolved(
 }
 
 export function starsFor(level: Level, keystrokes: number): 1 | 2 | 3 {
+  if (level.freePlay) return 3
   if (keystrokes <= level.par) return 3
   if (keystrokes <= Math.ceil(level.par * 1.5)) return 2
   return 1

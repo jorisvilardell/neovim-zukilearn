@@ -23,6 +23,8 @@ export type Validation =
 /** One task inside a level. Steps run on the same buffer, one after another. */
 export type LevelStep = {
   validate: Validation
+  /** Shown as the expected buffer when the check itself is tolerant. */
+  expects?: string
 }
 
 export type Level = {
@@ -36,6 +38,8 @@ export type Level = {
   par: number
   /** Keys highlighted as the lesson of this level. */
   teaches: string[]
+  /** Free play: keystrokes are not scored, so beginners can experiment. */
+  freePlay?: boolean
 }
 
 export type LevelResult = {

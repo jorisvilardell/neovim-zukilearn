@@ -220,7 +220,13 @@ export default function App() {
                 }}
               />
               <div className="min-w-0 flex-1">
-                <KeyLog mode={mode} keystrokes={keystrokes} par={level.par} recent={recent} />
+                <KeyLog
+                  mode={mode}
+                  keystrokes={keystrokes}
+                  par={level.par}
+                  freePlay={Boolean(level.freePlay)}
+                  recent={recent}
+                />
               </div>
             </div>
             <div className="h-[45vh] min-h-[16rem] lg:h-[55vh]">

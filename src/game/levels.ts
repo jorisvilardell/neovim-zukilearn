@@ -31,18 +31,36 @@ export const LEVELS: Level[] = [
     ],
     par: 4,
     teaches: ['i', 'Esc', 'v'],
+    freePlay: true,
   },
   {
     id: 'insert-text',
     chapter: 'basics',
     doc: 'hello',
     cursor: { line: 0, col: 0 },
+    // Tolerant checks: a beginner should be free to type anything else first.
     steps: [
-      { validate: { kind: 'doc', target: 'Zuki hello' } },
-      { validate: { kind: 'doc', target: 'Zuki hello!' } },
+      {
+        validate: {
+          kind: 'predicate',
+          fn: (text) => text.indexOf('Zuki') >= 0 && text.indexOf('Zuki') < text.indexOf('hello'),
+        },
+        expects: 'Zuki hello',
+      },
+      {
+        validate: {
+          kind: 'predicate',
+          fn: (text) =>
+            text.indexOf('Zuki') >= 0 &&
+            text.indexOf('Zuki') < text.indexOf('hello') &&
+            text.trimEnd().endsWith('!'),
+        },
+        expects: 'Zuki hello!',
+      },
     ],
     par: 16,
     teaches: ['i', 'a', 'A', 'Esc'],
+    freePlay: true,
   },
   {
     id: 'open-line',
@@ -50,11 +68,34 @@ export const LEVELS: Level[] = [
     doc: 'first line',
     cursor: { line: 0, col: 0 },
     steps: [
-      { validate: { kind: 'doc', target: doc('first line', 'second line') } },
-      { validate: { kind: 'doc', target: doc('zero line', 'first line', 'second line') } },
+      {
+        validate: {
+          kind: 'predicate',
+          fn: (text) => {
+            const lines = text.split('\n')
+            return lines.length >= 2 && lines.indexOf('first line') < lines.indexOf('second line')
+          },
+        },
+        expects: doc('first line', 'second line'),
+      },
+      {
+        validate: {
+          kind: 'predicate',
+          fn: (text) => {
+            const lines = text.split('\n')
+            return (
+              lines.indexOf('zero line') >= 0 &&
+              lines.indexOf('zero line') < lines.indexOf('first line') &&
+              lines.indexOf('first line') < lines.indexOf('second line')
+            )
+          },
+        },
+        expects: doc('zero line', 'first line', 'second line'),
+      },
     ],
     par: 30,
     teaches: ['o', 'O', 'Esc'],
+    freePlay: true,
   },
   {
     id: 'save-quit',
@@ -67,6 +108,7 @@ export const LEVELS: Level[] = [
     ],
     par: 8,
     teaches: [':w', ':q', ':wq', ':q!'],
+    freePlay: true,
   },
 
   // ---------------------------------------------------------------- motions

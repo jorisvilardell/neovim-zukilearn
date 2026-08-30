@@ -33,7 +33,7 @@ export default function LevelPanel({
   onNext,
 }: Props) {
   const { t } = useI18n()
-  const target = targetDoc(step.validate)
+  const target = targetDoc(step.validate) ?? step.expects ?? null
   const cursorTarget =
     step.validate.kind === 'cursor' || step.validate.kind === 'both' ? step.validate : null
 
@@ -88,16 +88,24 @@ export default function LevelPanel({
         </p>
       )}
 
+      {level.freePlay && (
+        <p className="rounded-lg border border-slate-700/70 bg-slate-800/40 p-2.5 text-xs text-slate-400">
+          {t('panel.freePlay')}
+        </p>
+      )}
+
       {result && (
         <p className="text-lg text-amber-400">
           {'★'.repeat(result.stars)}
           <span className="text-slate-700">{'★'.repeat(3 - result.stars)}</span>
           <span className="ml-2 align-middle text-sm text-slate-400">
-            {t('victory.stars', {
-              stars: result.stars,
-              keystrokes: result.keystrokes,
-              par: level.par,
-            })}
+            {level.freePlay
+              ? t('victory.freeStars', { keystrokes: result.keystrokes })
+              : t('victory.stars', {
+                  stars: result.stars,
+                  keystrokes: result.keystrokes,
+                  par: level.par,
+                })}
           </span>
         </p>
       )}
